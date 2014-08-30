@@ -103,7 +103,7 @@ def checkOsIsFresh(hosts,username,password,timeinterval=86400,multiProcessCount 
     cli = "stat /lost+found/ | grep Modify | awk -F ' ' {'print $2,$3,$4'};"
     cli += "exit $?" ## auto logout
     
-	import time
+    import time
     import datetime
     import string
     for output in result:
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     hostOsTimeList = []
 	
     net='10.1.0.'
-	pxenet='10.0.0.'
+    pxenet='10.0.0.'
 	
     username='root'
     password=
