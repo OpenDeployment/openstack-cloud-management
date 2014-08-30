@@ -59,51 +59,53 @@ def pxe((hostname,commandList)):
     return [hostname, result]
 
 def rebootAndInstall(hosts,timeinterval=15):
-"""
+    """
     a function to reboot the hosts ,using single-thread.
-"""
+    """
      # TimeInterval=15
-     RebootHostInPerInterval=1
+    RebootHostInPerInterval=1
     
-     with open('restartError.log','w') as file:
-         file.truncate()
+    with open('restartError.log','w') as file:
+        file.truncate()
 
-     while True:
-         for i in range(1,RebootHostInPerInterval+1) :
-             if hosts :
-                 commandList = []
-                 commandList.append("ipmitool -l lanplus -H %s -U admin -P admin chassis bootdev pxe" % (hosts[0]))
-                 commandList.append("ipmitool -I lanplus -H %s -U admin -P admin power reset" % (hosts[0]))
-                 result = pxe((hosts[0],commandList))
+    while True:
+        for i in range(1,RebootHostInPerInterval+1) :
+            if hosts :
+                commandList = []
+                commandList.append("ipmitool -l lanplus -H %s -U admin -P admin chassis bootdev pxe" % (hosts[0]))
+                commandList.append("ipmitool -I lanplus -H %s -U admin -P admin power reset" % (hosts[0]))
+                result = pxe((hosts[0],commandList))
                  
-                 if result[1] == 1:
-                     with open('restartError.log','a') as file:
-                         file.write(result[0]+'\n')
+                if result[1] == 1:
+                    with open('restartError.log','a') as file:
+                        file.write(result[0]+'\n')
                  
-                 #print 'host :%s ,restart state: %s' % (result[0],result[1])
-                 del hosts[0]
+                #print 'host :%s ,restart state: %s' % (result[0],result[1])
+                del hosts[0]
 
-         if hosts:
-             time.sleep(timeinterval)
-         else:
-             break
+        if hosts:
+            time.sleep(timeinterval)
+        else:
+            break
 
 
-def checkOsIsFresh(hosts,username,password,timeinterval=86400,multiProcessCount = 10)
-"""
+def checkOsIsFresh(hosts,username,password,timeinterval=86400,multiProcessCount = 10):
+    """
     a function to check the hosts' os are new install one,using the multi-thread.
-	the default timeinterval that judge the fresh os is default as 1 day.
-	return :
-			[errorList,oldOsHost]
-"""
+    the default timeinterval that judge the fresh os is default as 1 day.
+    return :
+        [errorList,oldOsHost]
+    """
+    
+    oldOsHost = []
+    errorList = []
+    cli = "stat /lost+found/ | grep Modify | awk -F ' ' {'print $2,$3,$4'};"
+    cli += "exit $?" ## auto logout
     pool = Pool(processes=multiProcessCount)
     res=pool.map_async(pssh,((host,username,password,cli) for host in hosts))
     result=res.get()
 
-    cli = "stat /lost+found/ | grep Modify | awk -F ' ' {'print $2,$3,$4'};"
-    cli += "exit $?" ## auto logout
-    
-    import time
+    import time 
     import datetime
     import string
     for output in result:
@@ -137,8 +139,9 @@ def checkOsIsFresh(hosts,username,password,timeinterval=86400,multiProcessCount 
         print oldOsHost
     pool.close()
     pool.join()
-	
-	return [errorList,oldOsHost]
+    return [errorList,oldOsHost]
+
+
 
 if __name__ == '__main__':
     
@@ -146,23 +149,27 @@ if __name__ == '__main__':
     errorList = []
     hostOsTimeList = []
 	
-    net='10.1.0.'
+    net='10.1.4.'
     pxenet='10.0.0.'
 	
     username='root'
-    password=
+    password='qinghua'
 	
     #unit:second, be sure that the time in your host and server are normal.be regardless of time zone,the code will auto hanlde the timezone issue.
     NewOSFilterInterval = 60 * 60 ## 
 	
-    for i in range(8,90+1):
+    for i in range(21,27):
         hostList.append(net+str(i))
 
     result=checkOsIsFresh(hostList,username,password,NewOSFilterInterval)
-    
+
+    print 'error'
+    print result[0]
+    print 'old'
+    print result[1] 
     # add host to the `reboot` list to reboot them ,in a single-thread function with a resonable time interval which you need to set according. 
     # the time interval avoid a shot to the power provider when lots of compute hosts need to restart.
-    waitRebootHost = result[0] # oldOsHost# errorList
+    waitRebootHost = []# result[0] # oldOsHost# errorList
     reboot =[]
     for host in waitRebootHost:
         reboot.append(pxenet+host[7:])
