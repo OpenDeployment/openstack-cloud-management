@@ -17,7 +17,9 @@
 ## Be aware:
 ##    2014-08-24 : using multiprocessing.dummy to archieve multi-thread instead of multi-processing with multiprocessing
 ##         in multi-process, the function pssh will cause error like "local variable 's' referenced before assignment"
-##      
+## 
+##    2014-08-30 : make sure that you delete the file ' /root/.ssh/konw_hosts ' after you reinstall the OS in host ,or you will     
+##         meet the error as you can not load into the OS by pxssh,it will always show as error.
 ## ################################################################################
 
 import os
