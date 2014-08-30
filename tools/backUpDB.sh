@@ -16,7 +16,9 @@
 #
 # if the script is not in a dir of '~' ,but in a path ,as '/var/lib/',then deploy like : 
 #     (crontab -l -u mysql 2>&1 | grep -q backUpDB.sh) || echo '@weekly  cd /var/lib;/bin/sh backUpDB.sh >> /var/log/dbbackUpJob.log 2>&1' >> /var/spool/cron/mysql
-
+# 
+# if you want to specify the time point  that execute the script,deploy as: ( do job at 4:00 am per week )
+#     (crontab -l -u root 2>&1 | grep -q backUpDB.sh) || echo '0 4 */7 * *   /bin/sh backUpDB.sh >> /var/log/dbbackUpJob.log 2>&1' >> /var/spool/cron/root 
 
 # datatabase connection Info 
 # you should provide a user with the adminstrator role to execute the dump operation
