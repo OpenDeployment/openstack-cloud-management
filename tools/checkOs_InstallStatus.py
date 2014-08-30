@@ -27,7 +27,7 @@ import pxssh
 from multiprocessing.dummy import Pool
 import subprocess
 import OpenIPMI
-
+import time
 def pssh((hostname,username,password,cli)):
     print 'host:%s,cli:%s' % (hostname,cli)
     output=''
@@ -105,7 +105,7 @@ def checkOsIsFresh(hosts,username,password,timeinterval=86400,multiProcessCount 
     res=pool.map_async(pssh,((host,username,password,cli) for host in hosts))
     result=res.get()
 
-    import time 
+#    import time 
     import datetime
     import string
     for output in result:
@@ -149,16 +149,18 @@ if __name__ == '__main__':
     errorList = []
     hostOsTimeList = []
 	
-    net='10.1.4.'
+    net='10.1.0.'
     pxenet='10.0.0.'
 	
     username='root'
-    password='qinghua'
+    password='root'
 	
     #unit:second, be sure that the time in your host and server are normal.be regardless of time zone,the code will auto hanlde the timezone issue.
     NewOSFilterInterval = 60 * 60 ## 
 	
-    for i in range(21,27):
+    for i in range(100,105+1):
+        hostList.append(net+str(i))
+    for i in range(129,144+1):
         hostList.append(net+str(i))
 
     result=checkOsIsFresh(hostList,username,password,NewOSFilterInterval)
@@ -169,7 +171,7 @@ if __name__ == '__main__':
     print result[1] 
     # add host to the `reboot` list to reboot them ,in a single-thread function with a resonable time interval which you need to set according. 
     # the time interval avoid a shot to the power provider when lots of compute hosts need to restart.
-    waitRebootHost = []# result[0] # oldOsHost# errorList
+    waitRebootHost = result[1] #oldOsHost # errorList
     reboot =[]
     for host in waitRebootHost:
         reboot.append(pxenet+host[7:])
