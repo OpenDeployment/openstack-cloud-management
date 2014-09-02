@@ -14,12 +14,15 @@
 ##      python setup install
 ##
 ##        
-## Be aware:
+## Be aware: **
 ##    2014-08-24 : using multiprocessing.dummy to archieve multi-thread instead of multi-processing with multiprocessing
 ##         in multi-process, the function pssh will cause error like "local variable 's' referenced before assignment"
-## 
+##
+## Cautions: *****
 ##    2014-08-30 : make sure that you delete the file ' /root/.ssh/konw_hosts ' after you reinstall the OS in host ,or you will     
 ##         meet the error as you can not load into the OS by pxssh,it will always show as error.
+## 
+##    Please don't execute this script in the host with some important sevices ,otherwise ,it may effect these services by deleting their ssl keys
 ## ################################################################################
 
 import os
@@ -91,7 +94,7 @@ def rebootAndInstall(hosts,timeinterval=15):
             break
 
 
-def checkOsIsFresh(hosts,username,password,timeinterval=86400,multiProcessCount = 10):
+def checkOsIsFresh(hosts,username,password,timeinterval=86400,multiProcessCount = 10): 
     """
     a function to check the hosts' os are new install one,using the multi-thread.
     the default timeinterval that judge the fresh os is default as 1 day.
@@ -101,13 +104,19 @@ def checkOsIsFresh(hosts,username,password,timeinterval=86400,multiProcessCount 
     
     oldOsHost = []
     errorList = []
+    
     cli = "stat /lost+found/ | grep Modify | awk -F ' ' {'print $2,$3,$4'};"
     cli += "exit $?" ## auto logout
+    
+    ## delete the existed ssl public key for the new install host
+    with open('/root/.ssh/known_host','w') as file:
+        lines = file.truncate()
+          
     pool = Pool(processes=multiProcessCount)
     res=pool.map_async(pssh,((host,username,password,cli) for host in hosts))
     result=res.get()
-
-#    import time 
+    
+#   import time 
     import datetime
     import string
     for output in result:
