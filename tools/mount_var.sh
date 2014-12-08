@@ -31,4 +31,6 @@ cd /var
 tar -zxvf /root/var.tgz
 
 # add entry in /etc/fstab
+sed -i -e 's:.* /var .*::g' /etc/fstab
 echo "/dev/sdf1 /var   ext3    defaults 1 1" >> /etc/fstab
+reboot
