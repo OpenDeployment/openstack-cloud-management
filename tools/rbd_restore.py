@@ -102,6 +102,7 @@ def restore_volume(new_volume, backup_volume):
     rm_cmd = str(RBD + " rm " + "volumes/" + "volume-" + (str(new_volume.id)))
     #print "rm_cmd", rm_cmd
     obj = subprocess.Popen(rm_cmd, stdin=_PIPE, stdout=_PIPE, stderr=_PIPE, shell=True) 
+    obj.communicate()
     
     # get backup image and snapshots
     # sort the backup images by file creating time.
@@ -116,7 +117,14 @@ def restore_volume(new_volume, backup_volume):
         cmd = str( RBD + import_opt + abs_file + " volumes/" + "volume-" + (str(new_volume.id)))
         #print "cmd", cmd
         obj = subprocess.Popen(cmd, stdin=_PIPE, stdout=_PIPE, stderr=_PIPE, shell=True) 
+        obj.communicate()
         import_opt = " import-diff "
+
+    # purge all the snapshots, otherwise cinder CLI cann't delete the new volume.
+    cmd = str( RBD + " snap purge " + " volumes/" + "volume-" + (str(new_volume.id)))
+    #print "purge: ", cmd
+    obj = subprocess.Popen(cmd, stdin=_PIPE, stdout=_PIPE, stderr=_PIPE, shell=True) 
+    obj.communicate()
 
     #     Original volume        New volume
     print files[0][7:] + "   " + str(new_volume.id)
@@ -134,4 +142,3 @@ if __name__ == "__main__":
     for backup_volume in valid_backups:
         new_volume = create_volume()
         restore_volume(new_volume, backup_volume)
-
