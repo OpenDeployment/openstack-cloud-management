@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 # restore volume from the backup image
 # Kui.Shi@huawei.com
 #
